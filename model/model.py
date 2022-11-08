@@ -1,3 +1,58 @@
+"""
+    Name: model.py
+    Author(s): Jared Azevedo & Andres Suarez
+    Desc: baseline model to predict whether an individual will purchase a specific good
+"""
+import pandas as pd
+import numpy as np
+
+def split_dataset(data, train_split=0.75, val_split=0.125, test_split=0.125):
+    data_sample = data.sample(frac=1, random_state=12)
+    indices_or_sections = [int(train_split * len(data)), int((1 - val_split - test_split) * len(data))]
+    
+    train_ds, val_ds, test_ds = np.split(data_sample, indices_or_sections)
+
+    train_ds = tf.convert_to_tensor(train_ds, dtype=tf.float32)
+    val_ds = tf.convert_to_tensor(val_ds, dtype=tf.float32)
+    test_ds = tf.convert_to_tensor(test_ds, dtype=tf.float32)
+
+    return train_ds, val_ds, test_ds
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 """Define the model."""
 
 import tensorflow as tf

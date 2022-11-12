@@ -12,12 +12,12 @@ def step1(path, *quarters):
 Merges expd and fmld files for each quarter individually.
 """
 for elem in quarters:
-data = pd.read_csv(f'{path}\expd{elem}.csv')
-#path = r'C:\Users\Andres Felipe Suarez\Documents\GitHub\cs230antitrust\Data\diary21'
-file = 'fmld'+str(elem)+'.csv'
-right = pd.read_csv(f'{path}\{file}')
-data = pd.merge(data, right, how='left', on='NEWID')
-data.to_csv(path_or_buf=f'{path}\dairy21_merged{elem}.csv', index = False)
+    data = pd.read_csv(f'{path}\expd{elem}.csv')
+    #path = r'C:\Users\Andres Felipe Suarez\Documents\GitHub\cs230antitrust\Data\diary21'
+    file = 'fmld'+str(elem)+'.csv'
+    right = pd.read_csv(f'{path}\{file}')
+    data = pd.merge(data, right, how='left', on='NEWID')
+    data.to_csv(path_or_buf=f'{path}\dairy21_merged{elem}.csv', index = False)
 
 return data
 
@@ -29,15 +29,15 @@ Appends the files that resulted from the previous step.
 files = []
 
 for elem in os.listdir(path):
-if 'dairy21_merged' in str.lower(elem):
-files.append(elem)
+    if 'dairy21_merged' in str.lower(elem):
+        files.append(elem)
 
 data = pd.read_csv(f'{path}\{files[0]}')
 files.pop()
 
 for elem in files:
-additional_data = pd.read_csv(f'{path}\{elem}')
-data = data.append(additional_data)
+    additional_data = pd.read_csv(f'{path}\{elem}')
+        data = data.append(additional_data)
 
 data.to_csv(path_or_buf=f'{path}\compiled.csv', index = False)
 return data
@@ -46,16 +46,16 @@ return data
 def weekly_files(path):
 files = []
 for elem in os.listdir(path):
-if 'expd' in str.lower(elem):
-files.append(elem)
+    if 'expd' in str.lower(elem):
+        files.append(elem)
 
 data = pd.read_csv(f'{path}\{files[0]}')
 files.pop()
 
 for elem in files:
-additional_data = pd.read_csv(f'{path}\{elem}')
-data = data.append(additional_data)
-print(data.shape)
+    additional_data = pd.read_csv(f'{path}\{elem}')
+    data = data.append(additional_data)
+    print(data.shape)
 
 data.to_csv(path_or_buf=f'{path}\data_dairy21.csv', index = False)
 return data
@@ -63,12 +63,12 @@ return data
 def annual_files(path, data):
 files = []
 for elem in os.listdir(path):
-if 'fmld' in str.lower(elem):
-files.append(elem)
+    if 'fmld' in str.lower(elem):
+        files.append(elem)
 
 for elem in files:
-right = pd.read_csv(f'{path}\{elem}')
-data = pd.merge(data, right, how = 'left', on='NEWID')
+    right = pd.read_csv(f'{path}\{elem}')
+    data = pd.merge(data, right, how = 'left', on='NEWID')
 
 data.to_csv(path_or_buf=f'{path}\data_dairy21_merged.csv', index = False)
 return data
@@ -76,8 +76,8 @@ return data
 def files_fn(list):
 files = []
 for i in list:
-if '.csv' in i:
-files.append(i)
+    if '.csv' in i:
+        files.append(i)
 return files
 
 def process_directory_version2(path, file_name):
@@ -89,12 +89,12 @@ folders.pop(0)
 print(folders)
 
 for elem in folders:
-print(elem)
-path = f'{path}'
-print(f'{path}\{elem}')
-print(elem[-2:])
-data = pd.merge(data, pd.read_csv(f'{path}\{elem}\dtbd{elem[-2:]}1.csv'), on="NEWID", how="inner")
-print(data)
+    print(elem)
+    path = f'{path}'
+    print(f'{path}\{elem}')
+    print(elem[-2:])
+    data = pd.merge(data, pd.read_csv(f'{path}\{elem}\dtbd{elem[-2:]}1.csv'), on="NEWID", how="inner")
+    print(data)
 
 print(data)
 data.drop_duplicates()
@@ -104,8 +104,8 @@ drop_columns = []
 print(data)
 
 for col in data_head.columns:
-if data_head.at[1, col].strip().isalpha():
-drop_columns.append(col)
+    if data_head.at[1, col].strip().isalpha():
+        drop_columns.append(col)
 
 data = data.drop(drop_columns, axis="columns")
 
@@ -120,10 +120,10 @@ print('data type:', type(data))
 files.pop(0)
 
 for file in files:
-add = pd.read_csv(f'{path}\{file}')
-print(add, add.shape)
-data = pd.merge(data, add, on="NEWID", how="outer")
-print('data.shape:',data.shape)
+    add = pd.read_csv(f'{path}\{file}')
+    print(add, add.shape)
+    data = pd.merge(data, add, on="NEWID", how="outer")
+    print('data.shape:',data.shape)
 
 
 data.drop_duplicates()

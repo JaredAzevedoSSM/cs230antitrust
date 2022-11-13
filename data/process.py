@@ -1,56 +1,79 @@
 """
-Name: process.py
-Author(s): Jared Azevedo & Andres Suarez
+File: process.py
+
+Authors: Jared Azevedo & Andres Suarez
+
 Desc: merge CSV files, purge duplicate records, and convert to numerical format
 """
 import pandas as pd
+import sys
 import os
 
-
-def step1(path, *quarters):
+def merge_quarter(directory, quarter):
     """
-    Merges expd and fmld files for each quarter individually.
+    Desc: merges expd and fmld files for specified quarter
     """
-    for elem in quarters:
-        data = pd.read_csv(f'{path}\expd{elem}.csv')
-        #path = r'C:\Users\Andres Felipe Suarez\Documents\GitHub\cs230antitrust\Data\diary21'
-        file = 'fmld'+str(elem)+'.csv'
-        right = pd.read_csv(f'{path}\{file}')
-        data = pd.merge(data, right, how='left', on='NEWID')
-        data.to_csv(path_or_buf=f'{path}\dairy21_merged{elem}.csv', index = False)
+    expd_data = pd.read_csv(f'{directory}/expd{quarter}.csv')
+    fmld_data = pd.read_csv(f'{directory}/fmld{quarter}.csv')
+    merged_data = pd.merge(expd_data, fmld_data, how="left", on="NEWID")
 
-    return data
+    return merged_data
 
-
-def step2(path):
+def merge_directory(directory, quarters):
     """
-    Appends the files that resulted from the previous step.
+    Desc: merges all expd and fmld files in a given directory for the desired quarters
     """
-    files = []
+    merged_data_per_quarter = []
 
-    for elem in os.listdir(path):
-        if 'dairy21_merged' in str.lower(elem):
-            files.append(elem)
+    # Merge the necessary files for each quarter
+    for quarter in quarters:
+        merged_data_per_quarter.append(merge_quarter(directory, quarter))
 
-    data = pd.read_csv(f'{path}\{files[0]}')
-    files.pop()
+    # Merge all quarters together
+    merged_data_per_year = pd.concat(merged_data_per_quarter)
 
-    for elem in files:
-        additional_data = pd.read_csv(f'{path}\{elem}')
-        data = data.append(additional_data)
+    # Remove any duplicates
+    merged_data_per_year.drop_duplicates()
 
-    data.to_csv(path_or_buf=f'{path}\compiled.csv', index = False)
-    return data
+    head = merged_data_per_year.head()
+    drop_columns = []
 
+    # Find the columns that contain letters
+    for col in head.columns:
+        if str(head.at[1, col]).isalpha():
+            drop_columns.append(col)
+    
+    # Remove columns that contain letters instead of numbers
+    merged_data_per_year = merged_data_per_year.drop(drop_columns, axis="columns")
+
+    # Reorder columns such that our label column is at the front
+    label = merged_data_per_year["AMOUNT"]
+    merged_data_per_year = merged_data_per_year.drop(columns=["AMOUNT"])
+    merged_data_per_year.insert(loc=0, column="AMOUNT", value=label)
+
+    return merged_data_per_year
+
+
+def main(args):
+    """
+    Desc: process the quarters in the given directory and save it back to a new file so that we do not need to
+    process our data every time we want to run the model
+    """
+    directory = args[0]
+    quarters = args[1:]
+
+    merged_directory = merge_directory(directory, quarters)
+
+    merged_directory.to_csv(path_or_buf=f'{directory}/{directory}_merged.csv', index = False)
 
 
 if __name__ == '__main__':
-    path = r'C:\Users\Andres Felipe Suarez\Documents\GitHub\cs230antitrust\Data\diary21'
-    data = step1(path, 211, 212, 213, 214)
-    print(data.head())
-    print(data.shape)
-    data = step2(path)
-    print(data.head())
-    print(data.shape)
+    # Capture directory and desired quarters to process as input argument from command line
+    args = sys.argv[1:]
 
-
+    # Check we have right number of args before proceeding
+    if len(args) < 2:
+        print("Please enter the path to a directory and the desired quarters (ex: ./diary21 211 212)")
+    else:
+        # Run processing
+        main(args)

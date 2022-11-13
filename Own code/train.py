@@ -13,6 +13,22 @@ import sklearn.metrics as sk_metrics
 import tempfile
 import os
 
+
+class Normalize(tf.Module):
+    def __init__(self, x):
+        #Initialize the mean and standard deviation for normalization
+        self.mean = tf.Variable(tf.math.reduce_mean(x, axis = 0))
+        self.std = tf.Variable(tf.math.reduce_std(x, axis=0))
+
+    def norm(self, x):
+        #Normalize the input
+        return (x - self.mean)/self.std
+    
+    def unnorm(self, x):
+        #Unnormalize the input
+        return (x * self.std) + self.mean
+
+
 def train_dev_test_datasets(directory, data, train_frac, dev_frac):
     """
     Desc: Divides the data in train, dev, and test sets. Splits each database between features and labels. 
@@ -38,8 +54,25 @@ def train_dev_test_datasets(directory, data, train_frac, dev_frac):
     return {'train':{'x': x_train,'y': y_train}, 'dev':{'x': x_dev, 'y': y_dev}, 'test':{'x': x_test, 'y': y_test}}
 
 
+def normalize_feature_datasets(dictionary):
+    """
+    
+    """
+    #
+    norm_x = Normalize(dictionary['train']['x'])
+    
+    #
+    x_train_norm, x_dev_norm, x_test_norm = norm_x.norm(dictionary['train']['x']), norm_x.norm(dictionary['dev']['x']), norm_x.norm(dictionary['test']['x'])
+    
+    return {'train':{'x': x_train_norm,'y': dictionary['train']['y']}, 'dev':{'x': x_dev_norm, 'y': dictionary['dev']['y']}, 'test':{'x': x_test_norm, 'y': dictionary['test']['y']}}
+
+
+
+
 if __name__ == '__main__':
     path = r'C:\Users\Andres Felipe Suarez\Documents\GitHub\cs230antitrust\Data\diary21'
     data = pd.read_csv(f'{path}\diary21_merged.csv')
     dictionary = train_dev_test_datasets(path, data, 0.8, 0.5)
+    print(dictionary['train']['x'])
+    dictionary = normalize_feature_datasets(dictionary)
     print(dictionary['train']['x'])

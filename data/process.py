@@ -89,12 +89,20 @@ def merge_directory(directory, quarters):
     # Set COST column to binary value
     merged_data_per_year["COST"] = np.where(merged_data_per_year["COST"] > 0, 1, 0)
 
-    # Reorder columns such that our label column is at the front
+    # Reorder columns such that PURCHASED, NEWID, and UCC appear at the front
     label = merged_data_per_year["COST"]
     merged_data_per_year = merged_data_per_year.drop(columns=["COST"])
     merged_data_per_year.insert(loc=0, column="PURCHASED", value=label)
 
-    # 
+    newid = merged_data_per_year["NEWID"]
+    merged_data_per_year = merged_data_per_year.drop(columns=["NEWID"])
+    merged_data_per_year.insert(loc=1, column="NEWID", value=newid)
+
+    ucc = merged_data_per_year["UCC"]
+    merged_data_per_year = merged_data_per_year.drop(columns=["UCC"])
+    merged_data_per_year.insert(loc=2, column="UCC", value=ucc)
+
+    # Fill data so unpurchased goods are present
     merged_data_per_year = fill_missing_data(merged_data_per_year, newids, desired_goods)
 
     # Remove any duplicates

@@ -29,6 +29,30 @@ class Normalize(tf.Module):
         return (x * self.std) + self.mean
 
 
+
+class LogisticRegression(tf.Module):
+
+  def __init__(self):
+    self.built = False
+
+  def __call__(self, x, train=True):
+    # Initialize the model parameters on the first call
+    if not self.built:
+      # Randomly generate the weights and the bias term
+      rand_w = tf.random.uniform(shape=[x.shape[-1], 1], seed=22)
+      rand_b = tf.random.uniform(shape=[], seed=22)
+      self.w = tf.Variable(rand_w)
+      self.b = tf.Variable(rand_b)
+      self.built = True
+    # Compute the model output
+    z = tf.add(tf.matmul(x, self.w), self.b)
+    z = tf.squeeze(z, axis=1)
+    if train:
+      return z
+    return tf.sigmoid(z)
+
+
+
 def train_dev_test_datasets(directory, data, train_frac, dev_frac):
     """
     Desc: Divides the data in train, dev, and test sets. Splits each database between features and labels. 
@@ -56,7 +80,7 @@ def train_dev_test_datasets(directory, data, train_frac, dev_frac):
 
 def normalize_feature_datasets(dictionary):
     """
-    
+    Desc: Normalizes features over the train, dev, and test sets.
     """
     #
     norm_x = Normalize(dictionary['train']['x'])
@@ -67,6 +91,16 @@ def normalize_feature_datasets(dictionary):
     return {'train':{'x': x_train_norm,'y': dictionary['train']['y']}, 'dev':{'x': x_dev_norm, 'y': dictionary['dev']['y']}, 'test':{'x': x_test_norm, 'y': dictionary['test']['y']}}
 
 
+def log_loss(y_pred, y):
+  # Compute the log loss function
+  ce = tf.nn.sigmoid_cross_entropy_with_logits(labels=y, logits=y_pred)
+  return tf.reduce_mean(ce)
+
+
+def train():
+    pass 
+
+
 
 
 if __name__ == '__main__':
@@ -75,4 +109,10 @@ if __name__ == '__main__':
     dictionary = train_dev_test_datasets(path, data, 0.8, 0.5)
     print(dictionary['train']['x'])
     dictionary = normalize_feature_datasets(dictionary)
-    print(dictionary['train']['x'])
+    print('dictionary[train][x]:',dictionary['train']['x'])
+    log_reg = LogisticRegression()
+    y_pred = log_reg(dictionary['train']['x'][:5], train=False)
+    print('a')
+    y_pred.numpy()
+    print(y_pred)
+

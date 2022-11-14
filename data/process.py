@@ -39,7 +39,7 @@ def fill_missing_data(merged_data_per_year, newids, desired_goods):
     full_data = pd.concat([missing_data, merged_data_per_year])
 
     # Add demographic info to the unpurchased goods
-    for ind in full_data.index:
+    for ind in range(len(full_data)):
         if full_data.iloc[ind].PURCHASED == 0:
             temp_ucc = full_data.iloc[ind, 2]
             full_data.iloc[ind] = merged_data_per_year.loc[merged_data_per_year["NEWID"] == full_data.iloc[ind].NEWID].head(1)
@@ -107,6 +107,9 @@ def merge_directory(directory, quarters):
 
     # Remove any duplicates
     merged_data_per_year.drop_duplicates()
+
+    # Replace NaN with 0
+    merged_data_per_year = merged_data_per_year.fillna(0)
 
     return merged_data_per_year
 

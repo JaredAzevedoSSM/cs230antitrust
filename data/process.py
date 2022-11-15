@@ -49,22 +49,20 @@ def fill_missing_data(merged_data_per_year, newids, desired_goods):
     return full_data
 
 
-def merge_quarter(directory, quarter, newids, desired_goods):
+def merge_quarter(directory, quarter, newids):
     """
     Desc: merges expd and fmld files for specified quarter
     """
     expd_data = pd.read_csv(f'{directory}/expd{quarter}.csv')
     # Only keep the columns we are interested in (expenditure info)
     expd_data = expd_data[["NEWID", "COST", "UCC"]]
-    # Only keep the rows we are interested in (goods info)
-    expd_data = expd_data[expd_data["UCC"].isin(desired_goods)]
-
     fmld_data = pd.read_csv(f'{directory}/fmld{quarter}.csv')
     # Only keep the columns we are interested in (demographic info)
     fmld_data = fmld_data[["NEWID", "AGE_REF", "BLS_URBN", "EDUC_REF", "FAM_TYPE", "HRSPRWK1", "FAM_SIZE", "FINCBEFX"]]
 
     merged_data = expd_data.merge(fmld_data, how="left", on="NEWID")
 
+    # Keep track of each unique ID (survey response) to backfill missing data later
     newids.update(set(merged_data["NEWID"]))
 
     return merged_data
@@ -75,13 +73,14 @@ def merge_directory(directory, quarters):
     Desc: merges all expd and fmld files in a given directory for the desired quarters
     """
     # Set list of goods codes that we want to keep
-    desired_goods = [10110, 20510, 30110, 100210, 120310]
+    # [10110, 20510, 30110, 100210, 120310]
+    desired_goods = [20510]
     newids = set()
     merged_data_per_quarter = []
 
     # Merge the necessary files for each quarter
     for quarter in quarters:
-        merged_data_per_quarter.append(merge_quarter(directory, quarter, newids, desired_goods))
+        merged_data_per_quarter.append(merge_quarter(directory, quarter, newids))
 
     # Merge all quarters together
     merged_data_per_year = pd.concat(merged_data_per_quarter)
@@ -104,6 +103,9 @@ def merge_directory(directory, quarters):
 
     # Fill data so unpurchased goods are present
     merged_data_per_year = fill_missing_data(merged_data_per_year, newids, desired_goods)
+
+    # Only keep the rows we are interested in (goods info)
+    merged_data_per_year = merged_data_per_year[merged_data_per_year["UCC"].isin(desired_goods)]
 
     # Remove any duplicates
     merged_data_per_year.drop_duplicates()

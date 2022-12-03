@@ -45,12 +45,14 @@ def get_uncompiled_model(path_to_dataset, fraction_of_data_to_train):
 
     # Insert input, hidden layers, and output into our model
     inputs = keras.Input(shape=(split_dataset['train']['x'].shape[1], ))
-    x = keras.layers.Dense(15, activation='relu', name='dense_1')(inputs)
+    x = keras.layers.Dense(32, activation='relu', name='dense_1')(inputs)
     x = keras.layers.Dropout(0.25, name='dropout_1')(x)
-    x = keras.layers.Dense(15, activation='relu', name='dense_2')(x)
+    x = keras.layers.Dense(64, activation='relu', name='dense_2')(x)
     x = keras.layers.Dropout(0.25, name='dropout_2')(x)
-    x = keras.layers.Dense(15, activation='relu', name='dense_3')(x)
+    x = keras.layers.Dense(128, activation='relu', name='dense_3')(x)
     x = keras.layers.Dropout(0.25, name='dropout_3')(x)
+    x = keras.layers.Dense(256, activation='relu', name='dense_4')(x)
+    x = keras.layers.Dropout(0.25, name='dropout_4')(x)
     outputs = keras.layers.Dense(1, activation="sigmoid", name="output")(x)
 
     # Create model instance

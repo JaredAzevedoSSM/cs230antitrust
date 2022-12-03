@@ -8,6 +8,7 @@ Desc: merge CSV files, purge duplicate records, and convert to numerical format
 import pandas as pd
 import numpy as np
 import sys
+import os
 
 
 def fill_missing_data(merged_data_per_year, newids, desired_goods):
@@ -58,7 +59,21 @@ def merge_quarter(directory, quarter, newids):
     expd_data = expd_data[["NEWID", "COST", "UCC"]]
     fmld_data = pd.read_csv(f'{directory}/fmld{quarter}.csv')
     # Only keep the columns we are interested in (demographic info)
-    fmld_data = fmld_data[["NEWID", "AGE_REF", "BLS_URBN", "EDUC_REF", "FAM_TYPE", "HRSPRWK1", "FAM_SIZE", "FINCBEFX"]]
+    fmld_data = fmld_data[["NEWID", "AGE_REF", 'AGE2',"ALCBEV","BAKEPROD",'BEEF',"BLS_URBN",'CEREAL','CHILDAGE','CUID','CUTENURE',
+                        'DESCRIP','DRUGSUPP','DIVISION',
+                        "EDUC_REF",'EGGS','EARNCOMP', 'EDUCA2', 'EMPLTYP1', 
+                        "FAM_TYPE", 'FINCBEFX', 'FINLWT21','FIRAX','FJSSDEDX', 'FPVTX', 'FSS_RRX', 'FWAGEX',  "FAM_SIZE", 'FOODTOT', 'FOODHOME', 'FRSHFRUT',
+                        "HRSPRWK1",'HRSPRWK2',
+                        'JFS_AMT','JGRCFDMV', 'JGRCFDWK','JGROCYMV','JGROCYWK',
+                        'MARITAL1', 'MILKPROD',
+                        'NO_EARNR', 'OTHDAIRY',
+                        'OCCEXPNX', 'OTHMEAT', 'OCCULIS2','OTHRECX', 'OCCULIS1', 
+                        'PERSLT18','PERSOT64', 'PORK','POULTRY','POPSIZE',
+                        'RACE2','REC_FS','REF_RACE','REGION',
+                        'SEX_REF','SEX2','SMSASTAT','STRTMNTH', 'SEAFOOD',
+                        'VEHQ',
+                        'WEEKI','WK_WRKD2','WTREP01','WTREP02','WTREP03','WTREP04','WTREP05','WTREP06', 'WTREP07','WTREP08','WTREP09','WTREP10',
+                        ]]
 
     merged_data = expd_data.merge(fmld_data, how="left", on="NEWID")
 
@@ -68,7 +83,7 @@ def merge_quarter(directory, quarter, newids):
     return merged_data
 
 
-def merge_directory(directory, quarters):
+def merge_directory(directory):
     """
     Desc: merges all expd and fmld files in a given directory for the desired quarters
     """
@@ -77,6 +92,10 @@ def merge_directory(directory, quarters):
     desired_goods = [20510]
     newids = set()
     merged_data_per_quarter = []
+
+    # Retrieve each year quarters' numbers
+    quarters = os.listdir(directory)
+    quarters =  [c[c.index('.')-3: c.index('.')] for c in quarters if 'fmld' in c]
 
     # Merge the necessary files for each quarter
     for quarter in quarters:
@@ -108,7 +127,7 @@ def merge_directory(directory, quarters):
     merged_data_per_year = merged_data_per_year[merged_data_per_year["UCC"].isin(desired_goods)]
 
     # Remove any duplicates
-    merged_data_per_year.drop_duplicates()
+    # merged_data_per_year.drop_duplicates()
 
     # Replace NaN with 0
     merged_data_per_year = merged_data_per_year.fillna(0)
@@ -122,9 +141,9 @@ def main(args):
     process our data every time we want to run the model
     """
     directory = args[0]
-    quarters = args[1:]
+    # quarters = args[1:]
 
-    merged_directory = merge_directory(directory, quarters)
+    merged_directory = merge_directory(directory)
 
     merged_directory.to_csv(path_or_buf=f'{directory}/{directory}_merged.csv', index = False)
 
@@ -134,7 +153,7 @@ if __name__ == '__main__':
     args = sys.argv[1:]
 
     # Check we have right number of args before proceeding
-    if len(args) < 2:
+    if len(args) < 1:
         print("Please enter the path to a directory and the desired quarters (ex: ./diary21 211 212)")
     else:
         # Run processing

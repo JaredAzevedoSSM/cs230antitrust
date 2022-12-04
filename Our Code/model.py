@@ -97,9 +97,8 @@ def build_and_run_model(path_to_dataset, fraction_of_data_to_train=0.85, batch_s
 
     # Evaluate model
     print("Evaluating on test data...")
-    results = model.evaluate(split_dataset['test']['x'], split_dataset['test']['x'], batch_size=batch_sz)
-    print(f"""Test loss: {results[0]} \nTest accuracy: {results[1] * 100} \nTest AUROC: {results[2]} \nTest precision: {results[3]} 
-        \nTest recall: {results[4]} \n Test F1: {(2 * results[3] * results[4]) / (results[3] + results[4])}""")
+    results = model.evaluate(split_dataset['test']['x'], split_dataset['test']['y'], batch_size=batch_sz)
+    print(f"""\nTest loss: {results[0]} \nTest accuracy: {results[1] * 100} \nTest AUROC: {results[2]} \nTest precision: {results[3] * 100} \nTest recall: {results[4] * 100} \nTest F1: {(2 * results[3] * results[4]) / (results[3] + results[4])}""")
 
 
 def main(args):
@@ -109,7 +108,7 @@ def main(args):
     path_to_dataset = args[0]
 
     # Change hyperparameters here
-    build_and_run_model(path_to_dataset, 0.85, 128, 20)
+    build_and_run_model(path_to_dataset, 0.9, 128, 40)
 
 
 if __name__ == '__main__':

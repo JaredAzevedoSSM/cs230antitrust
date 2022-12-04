@@ -127,7 +127,7 @@ def merge_directory(directory):
     merged_data_per_year = merged_data_per_year[merged_data_per_year["UCC"].isin(desired_goods)]
 
     # Remove any duplicates
-    # merged_data_per_year.drop_duplicates()
+    merged_data_per_year.drop_duplicates()
 
     # Replace NaN with 0
     merged_data_per_year = merged_data_per_year.fillna(0)
@@ -135,26 +135,25 @@ def merge_directory(directory):
     return merged_data_per_year
 
 
-def main(args):
+def main():
     """
-    Desc: process the quarters in the given directory and save it back to a new file so that we do not need to
+    Desc: process the quarters in desired directories and save it back to a new file so that we do not need to
     process our data every time we want to run the model
     """
-    directory = args[0]
-    # quarters = args[1:]
+    # The directories we want to merge
+    directories = ["./diary21", "./diary20"]
+    merged_directories = []
 
-    merged_directory = merge_directory(directory)
+    # Merge each directory
+    for directory in directories:
+        merged_directories.append(merge_directory(directory))
 
-    merged_directory.to_csv(path_or_buf=f'{directory}/{directory}_merged.csv', index = False)
+    # Concatenate all of the merged, preprocessed directory files together
+    merged_directories = pd.concat(merged_directories)
+
+    # Save the concatenated directories to a new file
+    merged_directories.to_csv(path_or_buf='./merged_directories.csv', index = False)
 
 
 if __name__ == '__main__':
-    # Capture directory and desired quarters to process as input argument from command line
-    args = sys.argv[1:]
-
-    # Check we have right number of args before proceeding
-    if len(args) < 1:
-        print("Please enter the path to a directory and the desired quarters (ex: ./diary21 211 212)")
-    else:
-        # Run processing
-        main(args)
+    main()

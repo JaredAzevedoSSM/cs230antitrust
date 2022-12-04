@@ -44,7 +44,7 @@ def get_uncompiled_model(path_to_dataset, fraction_of_data_to_train):
     split_dataset = split_dataset_from_csv(path_to_dataset, fraction_of_data_to_train)
 
     # Insert input, hidden layers, and output into our model
-    inputs = keras.Input(shape=(split_dataset['train']['x'].shape[1], ))
+    inputs = keras.Input(shape=(split_dataset['train']['x'].shape[1]))
     x = keras.layers.Dense(32, activation='relu', name='dense_1')(inputs)
     x = keras.layers.Dropout(0.25, name='dropout_1')(x)
     x = keras.layers.Dense(64, activation='relu', name='dense_2')(x)
@@ -72,7 +72,7 @@ def get_compiled_model(path_to_dataset, fraction_of_data_to_train):
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=0.00001),
         loss=keras.losses.BinaryCrossentropy(),
-        metrics=[keras.metrics.Accuracy()],
+        metrics=[keras.metrics.Accuracy(), keras.metrics.AUC(), keras.metrics.Precision(), keras.metrics.Recall()],
     )
 
     return model, split_dataset
@@ -98,7 +98,8 @@ def build_and_run_model(path_to_dataset, fraction_of_data_to_train=0.85, batch_s
     # Evaluate model
     print("Evaluating on test data...")
     results = model.evaluate(split_dataset['test']['x'], split_dataset['test']['x'], batch_size=batch_sz)
-    print(f"Test loss: {results[0]} \nTest accuracy: {results[1] * 100}")
+    print(f"""Test loss: {results[0]} \nTest accuracy: {results[1] * 100} \nTest AUROC: {results[2]} \nTest precision: {results[3]} 
+        \nTest recall: {results[4]} \n Test F1: {(2 * results[3] * results[4]) / (results[3] + results[4])}""")
 
 
 def main(args):

@@ -18,6 +18,13 @@ def split_dataset_from_csv(path_to_dataset, fraction_of_data_to_train):
     """
     # Read the dataset from CSV
     compiled_data = pd.read_csv(path_to_dataset)
+
+    # Normalize each column (min-max)
+    # for col in compiled_data.columns:
+    #     if col == "NEWID" or col == "PURCHASED":
+    #         continue
+    #     compiled_data[col] = (compiled_data[col] - compiled_data[col].min()) / (compiled_data[col].max() - compiled_data[col].min())
+
     # Split the dataset into train, vali, and test sets
     train_dataset = compiled_data.sample(frac=fraction_of_data_to_train, random_state=1)
     val_dataset = compiled_data.drop(train_dataset.index).sample(frac=0.5, random_state=1)
@@ -53,6 +60,12 @@ def get_uncompiled_model(path_to_dataset, fraction_of_data_to_train):
     x = keras.layers.Dropout(0.25, name='dropout_3')(x)
     x = keras.layers.Dense(256, activation='relu', name='dense_4')(x)
     x = keras.layers.Dropout(0.25, name='dropout_4')(x)
+    # x = keras.layers.Dense(512, activation='relu', name='dense_5')(x)
+    # x = keras.layers.Dropout(0.25, name='dropout_5')(x)
+    # x = keras.layers.Dense(1024, activation='relu', name='dense_6')(x)
+    # x = keras.layers.Dropout(0.25, name='dropout_6')(x)
+    # x = keras.layers.Dense(2048, activation='relu', name='dense_7')(x)
+    # x = keras.layers.Dropout(0.25, name='dropout_7')(x)
     outputs = keras.layers.Dense(1, activation="sigmoid", name="output")(x)
 
     # Create model instance
@@ -78,7 +91,7 @@ def get_compiled_model(path_to_dataset, fraction_of_data_to_train):
     return model, split_dataset
 
 
-def build_and_run_model(path_to_dataset, fraction_of_data_to_train=0.85, batch_sz=128, nepochs=20):
+def build_and_run_model(path_to_dataset, fraction_of_data_to_train=0.9, batch_sz=128, nepochs=25):
     """
     Desc: create and run the model on the provided dataset (given via a path)
     """
@@ -108,7 +121,7 @@ def main(args):
     path_to_dataset = args[0]
 
     # Change hyperparameters here
-    build_and_run_model(path_to_dataset, 0.9, 128, 40)
+    build_and_run_model(path_to_dataset, 0.9, 128, 25)
 
 
 if __name__ == '__main__':

@@ -7,8 +7,17 @@ Desc: merge CSV files, purge duplicate records, and convert to numerical format
 """
 import pandas as pd
 import numpy as np
+import re
 import sys
 import os
+
+
+def cast_to_float(value):
+    """
+    Desc: make sure every value is a float and doesn't contain other characters
+    """
+    number = re.findall(r'\d+', str(value))
+    return float(number[0] if len(number) != 0 else 0)
 
 
 def fill_missing_data(merged_data_per_year, newids, desired_goods):
@@ -59,8 +68,8 @@ def merge_quarter(directory, quarter, newids):
     expd_data = expd_data[["NEWID", "COST", "UCC"]]
     fmld_data = pd.read_csv(f'{directory}/fmld{quarter}.csv')
     # Only keep the columns we are interested in (demographic info)
-    fmld_data = fmld_data[["NEWID", "AGE_REF", 'AGE2',"ALCBEV","BAKEPROD",'BEEF',"BLS_URBN",'CEREAL','CHILDAGE','CUID','CUTENURE',
-                        'DESCRIP','DRUGSUPP','DIVISION',
+    fmld_data = fmld_data[["NEWID", "AGE_REF", "AGE2", "ALCBEV","BAKEPROD",'BEEF',"BLS_URBN",'CEREAL','CHILDAGE','CUID','CUTENURE',
+                        'DESCRIP','DRUGSUPP',
                         "EDUC_REF",'EGGS','EARNCOMP', 'EDUCA2', 'EMPLTYP1', 
                         "FAM_TYPE", 'FINCBEFX', 'FINLWT21','FIRAX','FJSSDEDX', 'FPVTX', 'FSS_RRX', 'FWAGEX',  "FAM_SIZE", 'FOODTOT', 'FOODHOME', 'FRSHFRUT',
                         "HRSPRWK1",'HRSPRWK2',
@@ -127,10 +136,13 @@ def merge_directory(directory):
     merged_data_per_year = merged_data_per_year[merged_data_per_year["UCC"].isin(desired_goods)]
 
     # Remove any duplicates
-    merged_data_per_year.drop_duplicates()
+    # merged_data_per_year.drop_duplicates()
 
     # Replace NaN with 0
     merged_data_per_year = merged_data_per_year.fillna(0)
+
+    # Cast every column value as a float
+    merged_data_per_year = merged_data_per_year.applymap(cast_to_float)
 
     return merged_data_per_year
 
@@ -141,7 +153,7 @@ def main():
     process our data every time we want to run the model
     """
     # The directories we want to merge
-    directories = ["./diary21", "./diary20"]
+    directories = ["./diary21", "./diary20", "./diary19", "./diary18", "./diary17", "./diary16", "./diary15", "./diary14", "./diary13", "./diary12", "./diary11", "./diary10", "./diary09"]
     merged_directories = []
 
     # Merge each directory

@@ -11,6 +11,34 @@ import sys
 import pandas as pd
 
 
+def custom_crossentropy_pos(y_true, y_pred):
+    """
+    Desc: Similar to binary crossentropy, but weight towards positive labels - GIVES GOOD RECALL
+    """
+    return -tf.math.reduce_mean(tf.math.reduce_sum((tf.math.log(2 + y_pred) * (1 + y_true)) + (tf.math.log(1 + y_pred) * y_true)))
+
+
+def custom_true_label(y_true, y_pred):
+    """
+    Desc: Simply returns value of label when positive - GIVES GOOD ACCURACY
+    """
+    return y_true * y_pred
+
+
+def custom_mse_pos(y_true, y_pred):
+    """
+    Desc: Mean squared error loss with extra weight towards positive labels - GIVES GREAT RECALL
+    """
+    return tf.math.reduce_mean(tf.square(y_true - y_pred + 0.5))
+
+
+def custom_mse_neg(y_true, y_pred):
+    """
+    Desc: Mean squared error loss with extra weight towards positive labels - GIVES GOOD ACCURACY
+    """
+    return tf.math.reduce_mean(tf.square(y_true - y_pred - 0.5))
+
+
 def split_dataset_from_csv(path_to_dataset, fraction_of_data_to_train):
     """
     Desc: divides the data in train, val, and test sets; splits each database between features and labels; 
@@ -60,12 +88,6 @@ def get_uncompiled_model(path_to_dataset, fraction_of_data_to_train):
     x = keras.layers.Dropout(0.25, name='dropout_3')(x)
     x = keras.layers.Dense(256, activation='relu', name='dense_4')(x)
     x = keras.layers.Dropout(0.25, name='dropout_4')(x)
-    # x = keras.layers.Dense(512, activation='relu', name='dense_5')(x)
-    # x = keras.layers.Dropout(0.25, name='dropout_5')(x)
-    # x = keras.layers.Dense(1024, activation='relu', name='dense_6')(x)
-    # x = keras.layers.Dropout(0.25, name='dropout_6')(x)
-    # x = keras.layers.Dense(2048, activation='relu', name='dense_7')(x)
-    # x = keras.layers.Dropout(0.25, name='dropout_7')(x)
     outputs = keras.layers.Dense(1, activation="sigmoid", name="output")(x)
 
     # Create model instance
@@ -84,7 +106,7 @@ def get_compiled_model(path_to_dataset, fraction_of_data_to_train):
     # Compile the model; note that this is where to change abstract parts of the model
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=0.00001),
-        loss=keras.losses.BinaryCrossentropy(),
+        loss=custom_crossentropy_pos,
         metrics=[keras.metrics.Accuracy(), keras.metrics.AUC(), keras.metrics.Precision(), keras.metrics.Recall()],
     )
 
@@ -111,7 +133,8 @@ def build_and_run_model(path_to_dataset, fraction_of_data_to_train=0.9, batch_sz
     # Evaluate model
     print("Evaluating on test data...")
     results = model.evaluate(split_dataset['test']['x'], split_dataset['test']['y'], batch_size=batch_sz)
-    print(f"""\nTest loss: {results[0]} \nTest accuracy: {results[1] * 100} \nTest AUROC: {results[2]} \nTest precision: {results[3] * 100} \nTest recall: {results[4] * 100} \nTest F1: {(2 * results[3] * results[4]) / (results[3] + results[4])}""")
+    # Add F1: \nTest F1: {(2 * results[3] * results[4]) / (results[3] + results[4])}
+    print(f"""\nTest loss: {results[0]} \nTest accuracy: {results[1] * 100} \nTest AUROC: {results[2]} \nTest precision: {results[3] * 100} \nTest recall: {results[4] * 100}""")
 
 
 def main(args):

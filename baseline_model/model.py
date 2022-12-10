@@ -11,6 +11,13 @@ import sys
 import pandas as pd
 
 
+def custom_crossentropy_b(y_true, y_pred):
+    """
+    Desc: returns a high value (penalty) in case of mismatches between the true and predicted values. 
+    """
+    return - tf.math.reduce_mean(tf.math.reduce_sum((y_true/(y_pred + 0.1))+(1-y_true)/(1-y_pred + 0.1)))
+
+
 def custom_crossentropy_pos(y_true, y_pred):
     """
     Desc: Similar to binary crossentropy, but weight towards positive labels - GIVES GOOD RECALL
@@ -106,7 +113,7 @@ def get_compiled_model(path_to_dataset, fraction_of_data_to_train):
     # Compile the model; note that this is where to change abstract parts of the model
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=0.00001),
-        loss=custom_crossentropy_pos,
+        loss=keras.losses.BinaryCrossentropy(),
         metrics=[keras.metrics.Accuracy(), keras.metrics.AUC(), keras.metrics.Precision(), keras.metrics.Recall()],
     )
 

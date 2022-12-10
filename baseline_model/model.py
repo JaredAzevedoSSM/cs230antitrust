@@ -15,7 +15,7 @@ def custom_crossentropy_b(y_true, y_pred):
     """
     Desc: returns a high value (penalty) in case of mismatches between the true and predicted values. 
     """
-    return - tf.math.reduce_mean(tf.math.reduce_sum((y_true/(y_pred + 0.1))+(1-y_true)/(1-y_pred + 0.1)))
+    return - tf.math.reduce_mean(tf.math.reduce_sum((y_true/(y_pred + 0.01))+(1-y_true)/(1-y_pred + 0.01)))
 
 
 def custom_crossentropy_pos(y_true, y_pred):
@@ -87,13 +87,13 @@ def get_uncompiled_model(path_to_dataset, fraction_of_data_to_train):
 
     # Insert input, hidden layers, and output into our model
     inputs = keras.Input(shape=(split_dataset['train']['x'].shape[1]))
-    x = keras.layers.Dense(32, activation='relu', name='dense_1')(inputs)
+    x = keras.layers.Dense(64, activation='relu', name='dense_1')(inputs)
     x = keras.layers.Dropout(0.25, name='dropout_1')(x)
     x = keras.layers.Dense(64, activation='relu', name='dense_2')(x)
     x = keras.layers.Dropout(0.25, name='dropout_2')(x)
-    x = keras.layers.Dense(128, activation='relu', name='dense_3')(x)
+    x = keras.layers.Dense(64, activation='relu', name='dense_3')(x)
     x = keras.layers.Dropout(0.25, name='dropout_3')(x)
-    x = keras.layers.Dense(256, activation='relu', name='dense_4')(x)
+    x = keras.layers.Dense(64, activation='relu', name='dense_4')(x)
     x = keras.layers.Dropout(0.25, name='dropout_4')(x)
     outputs = keras.layers.Dense(1, activation="sigmoid", name="output")(x)
 
@@ -113,7 +113,7 @@ def get_compiled_model(path_to_dataset, fraction_of_data_to_train):
     # Compile the model; note that this is where to change abstract parts of the model
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=0.00001),
-        loss=keras.losses.BinaryCrossentropy(),
+        loss=custom_mse_pos,
         metrics=[keras.metrics.Accuracy(), keras.metrics.AUC(), keras.metrics.Precision(), keras.metrics.Recall()],
     )
 
